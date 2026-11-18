@@ -1,0 +1,4 @@
+mcp[cli]>=1.28,<2
+psycopg2-binary
+python-dotenv
+pytest

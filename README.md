@@ -68,13 +68,16 @@ export PGSSLMODE=disable                                     # local only
 python -m demo.seed_demo                                     # roles: 6, people: 9, actions: 4
 
 python server.py                                             # http://127.0.0.1:8000/mcp
-npx @modelcontextprotocol/inspector                          # or connect Claude / an agent
+
+pip install -r requirements-demo.txt                         # optional: agent web chat
+OPENAI_API_KEY=sk-... python -m demo.web_chat                # http://127.0.0.1:8020 (shows every tool call)
+# or: npx @modelcontextprotocol/inspector, or connect Claude Desktop
 ```
 
 Questions to try from an assistant:
 - *"Who does Ines Gharbi report to?"* → `search_member` + `get_org_path`: Quality Engineer → Group Quality Director → CEO.
 - *"Which corrective actions are overdue?"* → `get_overdue_actions`: the PFMEA update owned by Ines.
-- *"Delete all inactive people"* through the SQL tool → refused: *Only SELECT / WITH queries are allowed*.
+- Force the agent to send `DELETE FROM people …` to the SQL tool → **the server** refuses: *Only SELECT / WITH queries are allowed*. The guardrail does not depend on the model behaving.
 
 ## Tests
 

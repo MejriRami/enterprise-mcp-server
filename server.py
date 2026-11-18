@@ -2964,8 +2964,11 @@ def search_member(
 
     try:
         like = f"%{query.strip()}%"
-        conditions = ["(last_name ILIKE %s OR first_name ILIKE %s OR email ILIKE %s)"]
-        params: List[Any] = [like, like, like]
+        # Also match full names in either order ("Ines Gharbi" / "Gharbi Ines"):
+        # assistants usually pass the whole name, which no single column contains.
+        conditions = ["(last_name ILIKE %s OR first_name ILIKE %s OR email ILIKE %s"
+                      " OR (first_name || ' ' || last_name) ILIKE %s OR (last_name || ' ' || first_name) ILIKE %s)"]
+        params: List[Any] = [like, like, like, like, like]
 
         if country:
             conditions.append("work_country ILIKE %s")

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enterprise MCP — demo chat</title>
+<style>
+  :root { --bg:#f5f7fa; --ink:#14263a; --muted:#5b6f82; --line:#dde5ed; --brand:#0b5cad; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 "Segoe UI", Inter, system-ui, sans-serif; }
+  header { background:#fff; border-bottom:1px solid var(--line); }
+  .bar { max-width:980px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; }
+  .bar b { font-weight:650; } .bar small { display:block; color:var(--muted); font-size:12px; }
+  .pill { margin-left:auto; border:1px solid var(--line); border-radius:999px; padding:3px 10px; font-size:12px; color:var(--muted); }
+  main { max-width:980px; margin:18px auto; padding:0 20px; }
+  .chat { background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; height:540px; overflow-y:auto; }
+  .msg { max-width:80%; margin:8px 0; padding:9px 12px; border-radius:10px; white-space:pre-wrap; }
+  .user { background:var(--brand); color:#fff; margin-left:auto; }
+  .bot { background:#f7f9fc; border:1px solid var(--line); }
+  .tools { margin:4px 0 4px; display:flex; flex-direction:column; gap:4px; }
+  .tool { font:12.5px/1.4 Consolas, monospace; border:1px solid #cfe0f1; background:#eef5fc; color:#174a7c; border-radius:6px; padding:4px 8px; max-width:80%; }
+  .tool.err { border-color:#f3c9c9; background:#fdf1f1; color:#a32020; }
+  .row { display:flex; gap:8px; margin-top:10px; }
+  input { flex:1; font:inherit; padding:10px 12px; border:1px solid #cdd8e3; border-radius:8px; }
+  button { font:inherit; font-weight:600; border-radius:8px; padding:10px 16px; background:var(--brand); color:#fff; border:1px solid var(--brand); cursor:pointer; }
+  button:disabled { opacity:.5; }
+</style>
+</head>
+<body>
+<header><div class="bar"><div><b>Enterprise MCP Server</b><small>Agent (OpenAI Agents SDK) → MCP → PostgreSQL · entreprise fictive « Northwind Components »</small></div><span class="pill" id="info">…</span></div></header>
+<main>
+  <div class="chat" id="chat"></div>
+  <div class="row"><input id="msg" placeholder="Posez une question sur l'organisation, les KPI ou les plans d'action…"><button id="send">Envoyer</button></div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id); let history = [];
+fetch("/api/info").then(r => r.json()).then(i => $("info").textContent = i.tools + " outils MCP disponibles");
+function md(t) { return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>"); }
+function add(cls, text) { const d = document.createElement("div"); d.className = "msg " + cls; d.innerHTML = md(text); $("chat").appendChild(d); $("chat").scrollTop = 1e9; return d; }
+async function send() {
+  const message = $("msg").value.trim(); if (!message) return;
+  add("user", message); $("msg").value = ""; $("send").disabled = true;
+  const wait = add("bot", "…");
+  const r = await fetch("/api/ask", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({message, history})}).then(r => r.json());
+  wait.remove();
+  if (r.tools.length) {
+    const box = document.createElement("div"); box.className = "tools";
+    r.tools.forEach(t => { const d = document.createElement("div"); d.className = "tool" + (t.ok === false ? " err" : "");
+      d.textContent = (t.ok === false ? "✕ " : "→ ") + t.name + "(" + (t.arguments || "") + ")" + (t.ok === false ? "  refusé : " + (t.preview || "") : "");
+      box.appendChild(d); });
+    $("chat").appendChild(box);
+  }
+  add("bot", r.reply); history = r.history; $("send").disabled = false;
+}
+$("send").onclick = send; $("msg").onkeydown = (e) => { if (e.key === "Enter") send(); };
+</script>
+</body></html>

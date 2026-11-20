@@ -2,7 +2,7 @@
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server that gives AI assistants **controlled** access to a manufacturing group's internal systems: people directory and org chart, roles, KPIs and their monitoring, action plans, customers, RFQs, APQP projects and suppliers. It exposes **115 typed tools** over five PostgreSQL databases.
 
-**▶ [Demo video, about 2 min, French narration](https://github.com/MejriRami/enterprise-mcp-server/releases/download/demo/3_Serveur_MCP.mp4)** · fictional data
+**▶ [Demo video, about 2 min](https://mejrirami.github.io/demos/#mcp)**
 
 > **Résumé (FR)** : serveur MCP qui expose 115 outils typés aux assistants IA (annuaire et organigramme, rôles, KPI, plans d'action, clients, RFQ, APQP, fournisseurs) avec des garde-fous : requêtes SQL en lecture seule, profils d'outils par agent, création de table désactivée par défaut. Développé en entreprise ; ce dépôt est anonymisé et la démo utilise une entreprise fictive.
 
